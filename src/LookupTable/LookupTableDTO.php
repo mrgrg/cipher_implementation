@@ -19,12 +19,12 @@ class LookupTableDTO
         $this->tableWithMorphedAsKey = $reversedArray;
     }
 
-    public function getTableForEncryption(): array
+    public function getTableAsIntValues(): array
     {
         return $this->tableWithOriginalAsKey;
     }
 
-    public function getTableForDencryption(): array
+    public function getTableAsStrValues(): array
     {
         return $this->tableWithMorphedAsKey;
     }
