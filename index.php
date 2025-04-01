@@ -1,10 +1,10 @@
 <?php
 
+require_once 'vendor/autoload.php';
+
 use App\Crypto\BasicCrypto;
 use App\LookupTable\BasicLookupTable;
 use App\Provider\CipherServiceProvider;
-
-require_once 'vendor/autoload.php';
 
 $secretKey = 'xy';
 
