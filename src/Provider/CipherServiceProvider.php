@@ -9,9 +9,9 @@ class CipherServiceProvider
 {
     private LookupTableDTO $lookupTable;
     private CryptoInterface $crypto;
-    private string $secretKey;
+    private ?string $secretKey;
 
-    public function __construct(LookupTableDTO $lookupTable, CryptoInterface $crypto, string $secretKey) {
+    public function __construct(LookupTableDTO $lookupTable, CryptoInterface $crypto, ?string $secretKey = null) {
         $this->lookupTable = $lookupTable;
         $this->crypto = $crypto;
         $this->secretKey = $secretKey;
@@ -27,15 +27,23 @@ class CipherServiceProvider
         return $this->crypto;
     }
 
-    public function encode(string $message): string
+    public function encode(string $message, ?string $secretKey = null): string
     {
+        if (! is_null($secretKey)) {
+            $this->setSecretKey($secretKey);
+        }
+
         $table = $this->lookupTable;
         $key = $this->secretKey;
         return $this->crypto->encrypt($message, $table, $key);
     }
 
-    public function decode(string $secret): string
+    public function decode(string $secret, ?string $secretKey = null): string
     {
+        if (! is_null($secretKey)) {
+            $this->setSecretKey($secretKey);
+        }
+
         $table = $this->lookupTable;
         $key = $this->secretKey;
         return $this->crypto->decrypt($secret, $table, $key);
