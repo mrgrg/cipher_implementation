@@ -3,18 +3,18 @@
 namespace App\Provider;
 
 use App\LookupTable\LookupTableDTO;
-use App\Crypto\CryptoInterface;
+use App\Cryptographer\CryptographerInterface;
 use RuntimeException;
 
 class CipherServiceProvider
 {
     private LookupTableDTO $lookupTable;
-    private CryptoInterface $crypto;
+    private CryptographerInterface $cryptographer;
     private ?string $secretKey;
 
-    public function __construct(LookupTableDTO $lookupTable, CryptoInterface $crypto, ?string $secretKey = null) {
+    public function __construct(LookupTableDTO $lookupTable, CryptographerInterface $cryptographer, ?string $secretKey = null) {
         $this->lookupTable = $lookupTable;
-        $this->crypto = $crypto;
+        $this->cryptographer = $cryptographer;
         $this->secretKey = $secretKey;
     }
 
@@ -23,9 +23,9 @@ class CipherServiceProvider
         return $this->lookupTable;
     }
 
-    public function getCrypto(): CryptoInterface
+    public function getCryptographer(): CryptographerInterface
     {
-        return $this->crypto;
+        return $this->cryptographer;
     }
 
     public function encode(string $message, ?string $secretKey = null): string
@@ -34,7 +34,7 @@ class CipherServiceProvider
 
         $table = $this->lookupTable;
         $key = $this->secretKey;
-        return $this->crypto->encrypt($message, $table, $key);
+        return $this->cryptographer->encrypt($message, $table, $key);
     }
 
     public function decode(string $secret, ?string $secretKey = null): string
@@ -43,7 +43,7 @@ class CipherServiceProvider
 
         $table = $this->lookupTable;
         $key = $this->secretKey;
-        return $this->crypto->decrypt($secret, $table, $key);
+        return $this->cryptographer->decrypt($secret, $table, $key);
     }
 
     // TODO: Checking for $secretKey has valid characters

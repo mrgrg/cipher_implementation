@@ -1,19 +1,12 @@
 <?php
 
-namespace App\Crypto;
+namespace App\Cryptographer;
 
-use App\Crypto\CryptoInterface;
+use App\Cryptographer\CryptographerInterface;
 use App\LookupTable\LookupTableDTO;
 
-class BasicCrypto implements CryptoInterface
-{
-    protected string $secretKey;
-
-    public function __construct(string $secretKey)
-    {
-        $this->secretKey = $secretKey;
-    }
-    
+class BasicCryptographer implements CryptographerInterface
+{  
     public function encrypt(string $text, LookupTableDTO $lookupTable, string $secretKey): string
     {
         $encodedNumArr = [];
