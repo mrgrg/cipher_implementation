@@ -4,6 +4,7 @@ namespace App\Provider;
 
 use App\LookupTable\LookupTableDTO;
 use App\Crypto\CryptoInterface;
+use RuntimeException;
 
 class CipherServiceProvider
 {
@@ -29,9 +30,7 @@ class CipherServiceProvider
 
     public function encode(string $message, ?string $secretKey = null): string
     {
-        if (! is_null($secretKey)) {
-            $this->setSecretKey($secretKey);
-        }
+        $this->handleSecretKey($secretKey);
 
         $table = $this->lookupTable;
         $key = $this->secretKey;
@@ -40,18 +39,30 @@ class CipherServiceProvider
 
     public function decode(string $secret, ?string $secretKey = null): string
     {
-        if (! is_null($secretKey)) {
-            $this->setSecretKey($secretKey);
-        }
+        $this->handleSecretKey($secretKey);
 
         $table = $this->lookupTable;
         $key = $this->secretKey;
         return $this->crypto->decrypt($secret, $table, $key);
     }
 
-    public function setSecretKey(string $secter): void
+    // TODO: Checking for $secretKey has valid characters
+    // TODO: Make test chases for checking:
+    //       injected in constructor | injected in method | error thrown if not set
+    public function handleSecretKey($secretKey): void
     {
-        $this->secretKey = $secter;
+        if (! is_null($secretKey)) {
+            $this->secretKey = $secretKey;
+        }
+
+        if (is_null($this->secretKey)) {
+            throw new RuntimeException("A secret key must be provided!");
+        }
+    }
+
+    public function setSecretKey(string $secretKey): void
+    {
+        $this->secretKey = $secretKey;
     }
     
 }
