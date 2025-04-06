@@ -2,10 +2,11 @@
 
 namespace App\Cryptographer;
 
+use App\Attacker\KPACryptanalyserInterface;
 use App\Cryptographer\CryptographerInterface;
 use App\LookupTable\LookupTableDTO;
 
-class BasicCryptographer implements CryptographerInterface
+class BasicCryptographer implements CryptographerInterface, KPACryptanalyserInterface
 {  
     public function encrypt(string $text, LookupTableDTO $lookupTable, string $secretKey): string
     {
@@ -64,7 +65,35 @@ class BasicCryptographer implements CryptographerInterface
         return $decodedText;
     }
 
-    public function getNumberArrayFromString(string $string, LookupTableDTO $LUT): array
+    public function generateKey(string $crib, string $secretMsg, LookupTableDTO $lookupTable): string
+    {
+        $key = "";
+        $decodedKeyNumArray = [];
+
+        $numberArrFromMsg = $this->getNumberArrayFromString($crib, $lookupTable);
+        $numberArrFromSecrMsg = $this->getNumberArrayFromString($secretMsg, $lookupTable);
+
+        foreach ($numberArrFromMsg as $i => $val) {
+
+            $letterCode = $numberArrFromSecrMsg[$i] - $val;
+
+            if ($letterCode < 0) {
+                $letterCode = $letterCode + 27;
+            }
+
+            array_push($decodedKeyNumArray, $letterCode);
+        }
+
+        $decoderLUT = $lookupTable->getTableAsStrValues();
+        foreach ($decodedKeyNumArray as $number) {
+            $letter = $decoderLUT[$number];
+            $key .= $letter;
+        }
+
+        return $key;
+    }
+
+    private function getNumberArrayFromString(string $string, LookupTableDTO $LUT): array
     {
         $returnArray = [];
         $letterArr = str_split($string);
