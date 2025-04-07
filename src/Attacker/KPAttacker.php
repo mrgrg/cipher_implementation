@@ -2,21 +2,21 @@
 
 namespace App\Attacker;
 
-use App\Cryptographer\BasicCryptographer;
+use App\Attacker\KPACryptanalyserInterface;
 use App\LookupTable\LookupTableDTO;
 
 class KPAttacker
 {
     private array $encryptedMsgArray;
     private LookupTableDTO $lookupTable;
-    private BasicCryptographer $cryptographer;
+    private KPACryptanalyserInterface $cryptographer;
     private array $dictionary;
     private array $keys = [];
 
     public function __construct(
         array $encryptedMsgArray,
         LookupTableDTO $lookupTable,
-        BasicCryptographer $cryptographer,
+        KPACryptanalyserInterface $cryptographer,
         array $dictionary,
     ) {
         $this->encryptedMsgArray = $encryptedMsgArray;
