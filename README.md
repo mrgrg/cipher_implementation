@@ -36,7 +36,7 @@ Additionally it can accept a **secret key**, but this can also be injected when 
 The `App\Attacker\KPAttacker` can be used with a **cryptographer** which implements the `App\Attacker\KPACryptanalyserInterface`. It also needs an array of **encrypted messages**, an instance of the `App\LookupTable\LookupTableDTO` and a **dictionary**.
 
 ## Testing
-The `App\Cryptographer\BasicCryptographer` class is used to test both the `App\Provider\CipherServiceProvider` and the `App\Attacker\KPAttacker`. These tests can be found in the `./test` directory.
+The `App\Cryptographer\BasicCryptographer` class is used to test both the `App\Provider\CipherServiceProvider` and the `App\Attacker\KPAttacker`. These tests can be found in the `./tests` directory.
 
 To run all tests use this command:
 `php .\vendor\bin\phpunit .\tests\ --color`
