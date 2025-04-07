@@ -38,5 +38,7 @@ The `App\Attacker\KPAttacker` can be used with a **cryptographer** which impleme
 ## Testing
 The `App\Cryptographer\BasicCryptographer` class is used to test both the `App\Provider\CipherServiceProvider` and the `App\Attacker\KPAttacker`. These tests can be found in the `./tests` directory.
 
+> This project uses the [PHPUnit](https://docs.phpunit.de/en/12.1/) framework for testing.
+
 To run all tests use this command:
 `php .\vendor\bin\phpunit .\tests\ --color`
