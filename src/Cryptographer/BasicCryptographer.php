@@ -10,8 +10,8 @@ class BasicCryptographer implements CryptographerInterface, KPACryptanalyserInte
 {  
     public function encrypt(string $text, LookupTableDTO $lookupTable, string $secretKey): string
     {
-        $encodedNumArr = [];
-        $encodedText = '';
+        $encryptedNumArr = [];
+        $encryptedText = '';
 
         $numberArrFromText = $this->getNumberArrayFromString($text, $lookupTable);
         $numberArrFromKey = $this->getNumberArrayFromString($secretKey, $lookupTable);
@@ -24,23 +24,23 @@ class BasicCryptographer implements CryptographerInterface, KPACryptanalyserInte
                 $letterCode = $letterCode % 27;
             }
 
-            array_push($encodedNumArr, $letterCode);
+            array_push($encryptedNumArr, $letterCode);
         }
 
         $decoderLUT = $lookupTable->getTableAsStrValues();
-        foreach ($encodedNumArr as $number) {
+        foreach ($encryptedNumArr as $number) {
             $letter = $decoderLUT[$number];
-            $encodedText .= $letter;
+            $encryptedText .= $letter;
         }
 
-        return $encodedText;
+        return $encryptedText;
     }
 
     public function decrypt(string $text, LookupTableDTO $lookupTable, string $secretKey): string
     {
 
-        $decodedNumArr = [];
-        $decodedText = '';
+        $decryptedNumArr = [];
+        $decryptedText = '';
 
         $numberArrFromText = $this->getNumberArrayFromString($text, $lookupTable);
         $numberArrFromKey = $this->getNumberArrayFromString($secretKey, $lookupTable);
@@ -53,22 +53,22 @@ class BasicCryptographer implements CryptographerInterface, KPACryptanalyserInte
                 $letterCode = $letterCode + 27;
             }
 
-            array_push($decodedNumArr, $letterCode);
+            array_push($decryptedNumArr, $letterCode);
         }
 
         $decoderLUT = $lookupTable->getTableAsStrValues();
-        foreach ($decodedNumArr as $number) {
+        foreach ($decryptedNumArr as $number) {
             $letter = $decoderLUT[$number];
-            $decodedText .= $letter;
+            $decryptedText .= $letter;
         }
 
-        return $decodedText;
+        return $decryptedText;
     }
 
     public function generateKey(string $crib, string $secretMsg, LookupTableDTO $lookupTable): string
     {
         $key = "";
-        $decodedKeyNumArray = [];
+        $decryptedKeyNumArray = [];
 
         $numberArrFromMsg = $this->getNumberArrayFromString($crib, $lookupTable);
         $numberArrFromSecrMsg = $this->getNumberArrayFromString($secretMsg, $lookupTable);
@@ -81,11 +81,11 @@ class BasicCryptographer implements CryptographerInterface, KPACryptanalyserInte
                 $letterCode = $letterCode + 27;
             }
 
-            array_push($decodedKeyNumArray, $letterCode);
+            array_push($decryptedKeyNumArray, $letterCode);
         }
 
         $decoderLUT = $lookupTable->getTableAsStrValues();
-        foreach ($decodedKeyNumArray as $number) {
+        foreach ($decryptedKeyNumArray as $number) {
             $letter = $decoderLUT[$number];
             $key .= $letter;
         }

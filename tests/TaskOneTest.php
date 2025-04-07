@@ -21,17 +21,17 @@ class TaskOneTest extends TestCase
         $this->cipher = new CipherServiceProvider($lookupTable, $cryptographer, $secretKey);
     }
 
-    public function testIsMessageCorrectlyEncoded(): void
+    public function testIsMessageCorrectlyEncrypted(): void
     {
         $msg = "helloworld";
         $encryptedMsg = "hfnosauzun";
-        $this->assertSame($this->cipher->encode($msg), $encryptedMsg);
+        $this->assertSame($this->cipher->encrypt($msg), $encryptedMsg);
     }
 
-    public function testIsMessageCorrectlyDecoded(): void
+    public function testIsMessageCorrectlyDecrypted(): void
     {
         $msg = "helloworld";
         $encryptedMsg = "hfnosauzun";
-        $this->assertSame($this->cipher->decode($encryptedMsg), $msg);
+        $this->assertSame($this->cipher->decrypt($encryptedMsg), $msg);
     }
 }

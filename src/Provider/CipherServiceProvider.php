@@ -12,7 +12,8 @@ class CipherServiceProvider
     private CryptographerInterface $cryptographer;
     private ?string $secretKey;
 
-    public function __construct(LookupTableDTO $lookupTable, CryptographerInterface $cryptographer, ?string $secretKey = null) {
+    public function __construct(LookupTableDTO $lookupTable, CryptographerInterface $cryptographer, ?string $secretKey = null)
+    {
         $this->lookupTable = $lookupTable;
         $this->cryptographer = $cryptographer;
         $this->secretKey = $secretKey;
@@ -28,7 +29,7 @@ class CipherServiceProvider
         return $this->cryptographer;
     }
 
-    public function encode(string $message, ?string $secretKey = null): string
+    public function encrypt(string $message, ?string $secretKey = null): string
     {
         $this->handleSecretKey($secretKey);
 
@@ -37,7 +38,7 @@ class CipherServiceProvider
         return $this->cryptographer->encrypt($message, $table, $key);
     }
 
-    public function decode(string $secret, ?string $secretKey = null): string
+    public function decrypt(string $secret, ?string $secretKey = null): string
     {
         $this->handleSecretKey($secretKey);
 
@@ -46,9 +47,6 @@ class CipherServiceProvider
         return $this->cryptographer->decrypt($secret, $table, $key);
     }
 
-    // TODO: Checking for $secretKey has valid characters
-    // TODO: Make test chases for checking:
-    //       injected in constructor | injected in method | error thrown if not set
     public function handleSecretKey($secretKey): void
     {
         if (! is_null($secretKey)) {

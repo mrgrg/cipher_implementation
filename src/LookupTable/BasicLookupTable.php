@@ -12,8 +12,8 @@ class BasicLookupTable implements LookupTableInterface
         $lookupTable = [];
 
         // Since $array is an indexed array, and the
-        // required outcome needs the same value as the index
-        // just flip the pairs
+        // required outcome needs the values as indexes and the 
+        // indexes as values just flip the pairs
         foreach ($array as $key => $value) {
             $lookupTable[$value] = $key;
         }

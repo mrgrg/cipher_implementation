@@ -25,58 +25,54 @@ class KPAttacker
         $this->dictionary = $dictionary;
     }
 
-    public function getKeysWithEducatedGuess($encodedMsg, $crib): array
+    public function getKeysWithEducatedGuess($encryptedMsg, $crib): array
     {
-        $this->getKeysWithIteration($encodedMsg, $crib);
+        $this->getKeysWithIteration($encryptedMsg, $crib);
         return $this->keys;
     }
 
-    private function getKeysWithIteration($encodedMsg, $crib = null, $keyFragment = null): void
+    private function getKeysWithIteration($encryptedMsg, $crib = null, $keyFragment = null): void
     {
-        // excep from the first iteration
-        // crib must be decoded
+        // ignore at first iteration
+        // get crib from extended key 
         if (is_null($crib)) {
-            $encodedMsgSegment = substr($encodedMsg, 0, strlen($keyFragment));
-            $crib = $this->cryptographer->decrypt($encodedMsgSegment, $this->lookupTable, $keyFragment);
+            $encryptedMsgSegment = substr($encryptedMsg, 0, strlen($keyFragment));
+            $crib = $this->cryptographer->decrypt($encryptedMsgSegment, $this->lookupTable, $keyFragment);
         }
 
         // stop iteration if crib is overflowed
-        if ($this->isCribOverflowed($crib, $encodedMsg)) {
+        if ($this->isCribOverflowed($crib, $encryptedMsg)) {
             return;
         }
 
-        // check if crib can be a valid solution
-        if ($this->isCribValid($crib, $encodedMsg) && ! in_array($keyFragment, $this->keys)) {
+        // check if crib is a valid solution
+        if ($this->isCribValid($crib, $encryptedMsg) && ! in_array($keyFragment, $this->keys)) {
             $this->recordKeyAsSolved($keyFragment);
-            //array_push($this->keys, $keyFragment);
             return;
         }
 
-        // for next iteration
-        $nextEncodedMsg = $this->getNextEncodedMsg($encodedMsg);
+        // prepare for next iteration
+        $nextEncryptedMsg = $this->getNextEncryptedMsg($encryptedMsg);
 
-        // at first iteration: generate the key from guess
-        // other iterations: it is already given
+        // only at first iteration: generate the key from guess
         if (is_null($keyFragment)) {
-            $keyFragment = $this->cryptographer->generateKey($crib, $encodedMsg, $this->lookupTable);
-            $this->getKeysWithIteration($nextEncodedMsg, keyFragment: $keyFragment);
+            $keyFragment = $this->cryptographer->generateKey($crib, $encryptedMsg, $this->lookupTable);
+            $this->getKeysWithIteration($nextEncryptedMsg, keyFragment: $keyFragment);
         }
-
-        // if this is the very first entry,
-        // than these part must be skipped
+        // after first iteration
         else {
-            $extendedCribs = $this->getExtendedCribs($crib, $encodedMsg);
+            $extendedCribs = $this->getExtendedCribs($crib, $encryptedMsg);
             foreach ($extendedCribs as $newCrib) {
-                $extendedKey = $this->cryptographer->generateKey($newCrib, $encodedMsg, $this->lookupTable);
-                $this->getKeysWithIteration($nextEncodedMsg, keyFragment: $extendedKey);
+                $extendedKey = $this->cryptographer->generateKey($newCrib, $encryptedMsg, $this->lookupTable);
+                $this->getKeysWithIteration($nextEncryptedMsg, keyFragment: $extendedKey);
             }
         }
     }
 
-    private function isCribValid($crib, $encodedMsg): bool
+    private function isCribValid($crib, $encryptedMsg): bool
     {
 
-        if (strlen($crib) != strlen($encodedMsg)) {
+        if (strlen($crib) != strlen($encryptedMsg)) {
             return false;
         }
 
@@ -84,18 +80,18 @@ class KPAttacker
 
     }
 
-    private function isCribOverflowed($crib, $encodedMsg): bool
+    private function isCribOverflowed($crib, $encryptedMsg): bool
     {
-        if (strlen($crib) > strlen($encodedMsg)) {
+        if (strlen($crib) > strlen($encryptedMsg)) {
             return true;
         }
 
         return false;
     }
 
-    private function getExtendedCribs($crib, $encodedMsg): array
+    private function getExtendedCribs($crib, $encryptedMsg): array
     {
-        // instantiated for case if return array is empty
+        // pre-instantiated for cases where return array is empty
         $returnArr = [];
 
         $wordsArr = explode(" ", $crib);
@@ -103,7 +99,7 @@ class KPAttacker
 
         // crib is generated from guessed secret key,
         // sometimes this key extend the crib with 2
-        // extra word: check if penultimate is also valid
+        // extra word: return if penultimate is inalid
         if (isset($wordsArr[sizeof($wordsArr) - 2])) {
             if ( ! in_array($wordsArr[sizeof($wordsArr) - 2], $this->dictionary)) {
                 return $returnArr;
@@ -118,19 +114,19 @@ class KPAttacker
             return $returnArr;
         }
 
-        // reconstruct partials with guess
+        // reconstruct partial cribs with guess
         foreach ($possibleWords as $word) {
             $wordsArr[sizeof($wordsArr) - 1] = $word;
             $extendedCrib = implode(" ", $wordsArr);
 
             // add space at the end if it's not already present
-            // or does not has the exact length as the encoded one
-            if (substr($extendedCrib, -1) != " " && strlen($encodedMsg) != strlen($extendedCrib)) {
+            // or does not have the exact length as the encrypted one
+            if (substr($extendedCrib, -1) != " " && strlen($encryptedMsg) != strlen($extendedCrib)) {
                 $extendedCrib = $extendedCrib . " ";
             }
 
             // only push to array if not overflowed
-            if (strlen($encodedMsg) >= strlen($extendedCrib)) {
+            if (strlen($encryptedMsg) >= strlen($extendedCrib)) {
                 array_push($returnArr, $extendedCrib);
             }
         }
@@ -138,28 +134,28 @@ class KPAttacker
         return $returnArr;
     }
 
-    private function getNextEncodedMsg($encodedMsg): string
+    private function getNextEncryptedMsg($encryptedMsg): string
     {
         $numOfObservableMsg = count($this->encryptedMsgArray);
-        $indexOfCurrentlyObserved = array_search($encodedMsg, $this->encryptedMsgArray);
-        $nextEncodedMsg = ($indexOfCurrentlyObserved + 1) % $numOfObservableMsg;
+        $indexOfCurrentlyObserved = array_search($encryptedMsg, $this->encryptedMsgArray);
+        $nextEncryptedMsg = ($indexOfCurrentlyObserved + 1) % $numOfObservableMsg;
 
-        return $this->encryptedMsgArray[$nextEncodedMsg];
+        return $this->encryptedMsgArray[$nextEncryptedMsg];
     }
 
     private function recordKeyAsSolved($key): void
     {
 
-        foreach($this->encryptedMsgArray as $encodedMsg) {
+        foreach($this->encryptedMsgArray as $encryptedMsg) {
 
-            if (strlen($encodedMsg) > strlen($key)) {
+            if (strlen($encryptedMsg) > strlen($key)) {
                 return;
             }
 
-            // double check if decoded msg with key
+            // double check if decrypted msg with key
             // only holds words from the dictionary
-            $decodedMsg = $this->cryptographer->decrypt($encodedMsg, $this->lookupTable, $key);
-            $words = explode(" ", $decodedMsg);
+            $decryptedMsg = $this->cryptographer->decrypt($encryptedMsg, $this->lookupTable, $key);
+            $words = explode(" ", $decryptedMsg);
             foreach ($words as $word) {
                 if ( ! in_array($word, $this->dictionary)) {
                    return;
